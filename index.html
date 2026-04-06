@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CSC Digital Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(to right, #0f2027, #2c5364);
+}
+
+.container {
+  width: 350px;
+  margin: 60px auto;
+  background: white;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0px 0px 20px rgba(0,0,0,0.3);
+}
+
+h2 { text-align: center; }
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 15px;
+  background: #0072ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.toggle {
+  text-align: center;
+  margin-top: 10px;
+  color: blue;
+  cursor: pointer;
+}
+
+.hidden { display: none; }
+
+.logo {
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">CSC Portal</div>
+
+<!-- LOGIN -->
+<div id="loginBox">
+<h2>Login</h2>
+
+<input id="login_id" placeholder="User ID">
+<input id="login_pass" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<div class="toggle" onclick="showSignup()">New Registration</div>
+</div>
+
+<!-- SIGNUP -->
+<div id="signupBox" class="hidden">
+<h2>Register</h2>
+
+<input id="name" placeholder="Name">
+<input id="pass" type="password" placeholder="Password">
+
+<button onclick="signup()">Register</button>
+
+<p>Your ID: <b id="newid"></b></p>
+
+<div class="toggle" onclick="showLogin()">Back to Login</div>
+</div>
+
+</div>
+
+<script>
+
+// ====== CHECK JS LOAD ======
+console.log("JS Loaded Successfully");
+
+// 🔴 YOUR SCRIPT URL
+const URL = "https://script.google.com/macros/s/AKfycbys7e6TRg0ZLr7fjxt-cDdHrjCPgFtVwdcNwupNVSj8IfyUpfHmcr7s9c8X62NrUwHv3Q/exec";
+
+// ===== TOGGLE =====
+function showSignup(){
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("signupBox").style.display = "block";
+}
+
+function showLogin(){
+  document.getElementById("signupBox").style.display = "none";
+  document.getElementById("loginBox").style.display = "block";
+}
+
+// ===== LOGIN =====
+function login(){
+
+  alert("Login Button Clicked"); // 🔥 TEST
+
+  let id = document.getElementById("login_id").value.trim();
+  let pass = document.getElementById("login_pass").value.trim();
+
+  if(!id || !pass){
+    alert("ID aur Password dalo");
+    return;
+  }
+
+  let api = URL + "?action=login&userid=" + id + "&password=" + pass;
+
+  console.log("API:", api);
+
+  fetch(api)
+  .then(res => res.text())
+  .then(data => {
+
+    console.log("Response:", data);
+
+    if(data.includes("<html")){
+      alert("❌ Script permission problem (Anyone access do)");
+      return;
+    }
+
+    let json = JSON.parse(data);
+
+    if(json.status == "success"){
+      alert("✅ Login Success");
+
+      if(json.role == "admin"){
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "agent.html";
+      }
+
+    } else {
+      alert("❌ Wrong ID Password");
+    }
+
+  })
+  .catch(err => {
+    console.log(err);
+    alert("❌ Network error");
+  });
+}
+
+// ===== SIGNUP =====
+function signup(){
+
+  let name = document.getElementById("name").value.trim();
+  let pass = document.getElementById("pass").value.trim();
+
+  if(!name || !pass){
+    alert("Fill all fields");
+    return;
+  }
+
+  let api = URL + "?action=createAgent&name=" + name + "&password=" + pass;
+
+  fetch(api)
+  .then(res => res.text())
+  .then(data => {
+
+    console.log("Signup:", data);
+
+    let json = JSON.parse(data);
+
+    if(json.status == "success"){
+      document.getElementById("newid").innerText = json.userid;
+      alert("✅ Registration Done");
+    }
+
+  });
+}
+
+</script>
+
+</body>
+</html>
